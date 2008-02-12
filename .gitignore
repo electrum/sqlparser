@@ -1,0 +1,5 @@
+*.class
+Query__.g
+Query.tokens
+QueryLexer.java
+QueryParser.java
