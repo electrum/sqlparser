@@ -44,6 +44,9 @@ whereClause
 
 whereExpr
 	:	expr cmpOp expr
+	|	expr BETWEEN expr AND expr
+	|	expr NOT BETWEEN expr AND expr
+	|	NOT whereExpr
 	;
 
 groupBy	:	expr (',' expr)*
@@ -75,6 +78,10 @@ ORDER 	: 	('O'|'o')('R'|'r')('D'|'d')('E'|'e')('R'|'r') ;
 HAVING 	: 	('H'|'h')('A'|'a')('V'|'v')('I'|'i')('N'|'n')('G'|'g') ;
 OR 	: 	('O'|'o')('R'|'r') ;
 AND 	: 	('A'|'a')('N'|'n')('D'|'d') ;
+IN	:	('I'|'i')('N'|'n') ;
+NOT	:	('N'|'n')('O'|'o')('T'|'t') ;
+EXISTS	:	('E'|'e')('X'|'x')('I'|'i')('S'|'s')('T'|'t')('S'|'s') ;
+BETWEEN	:	('B'|'b')('E'|'e')('T'|'t')('W'|'w')('E'|'e')('E'|'e')('N'|'n') ;
 
 NUMBER	:	('0'..'9')+ ;
 
