@@ -39,14 +39,19 @@ tableExpr
 	;
 
 whereClause
-	:	whereExpr ((AND | OR) whereExpr)?
+	:	whereExpr ((AND | OR) whereExpr)*
 	;
 
 whereExpr
-	:	expr cmpOp expr
-	|	expr BETWEEN expr AND expr
-	|	expr NOT BETWEEN expr AND expr
-	|	NOT whereExpr
+	:	NOT* expr cmpExpr
+	;
+
+cmpExpr	:	cmpOp expr
+	| 	BETWEEN expr AND expr
+	| 	NOT BETWEEN expr AND expr
+	| 	LIKE expr
+	|	NOT LIKE expr
+	| 	IN '(' expr (',' expr)* ')'
 	;
 
 groupBy	:	expr (',' expr)*
@@ -62,7 +67,16 @@ orderBy	:	expr (',' expr)*
 cmpOp	:	('='|'<>'|'!='|'<'|'<='|'>'|'>=')
 	;
 
-expr	:	ident | NUMBER;
+expr	:	exprItem (mathOp exprItem)*
+	;
+
+mathOp	:	('+'|'-'|'*'|'/'|'%') ;
+
+exprItem:	ident
+	| 	NUMBER
+	|	STRING
+	|	'(' expr ')'
+	;
 
 ident	:	IDENT ;
 
@@ -82,6 +96,11 @@ IN	:	('I'|'i')('N'|'n') ;
 NOT	:	('N'|'n')('O'|'o')('T'|'t') ;
 EXISTS	:	('E'|'e')('X'|'x')('I'|'i')('S'|'s')('T'|'t')('S'|'s') ;
 BETWEEN	:	('B'|'b')('E'|'e')('T'|'t')('W'|'w')('E'|'e')('E'|'e')('N'|'n') ;
+LIKE 	: 	('L'|'l')('I'|'i')('K'|'k')('E'|'e') ;
+
+STRING	:	'\'' ( ~'\'' | '\'' '\'' )* '\'' ;
+
+SQUOTE	:	'\'' ;
 
 NUMBER	:	('0'..'9')+ ;
 
