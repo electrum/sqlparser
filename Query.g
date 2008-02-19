@@ -13,8 +13,8 @@ query	:	selectStmt ';'
 selectStmt
 	:	SELECT selectExpr
 		FROM tableList
-		(WHERE whereClause)?
-		(GROUP BY groupBy (HAVING havingClause)?)?
+		(WHERE searchCond)?
+		(GROUP BY groupBy (HAVING searchCond)?)?
 		(ORDER BY orderBy)?
 	;
 
@@ -27,7 +27,7 @@ columnList
 	;
 
 columnExpr
-	:	expr (AS? ident)?
+	:	rowVal (AS? ident)?
 	;
 
 tableList
@@ -38,44 +38,79 @@ tableExpr
 	:	ident (AS? ident)?
 	;
 
-whereClause
-	:	whereExpr ((AND | OR) whereExpr)*
+searchCond
+	:	booleanTerm (OR booleanTerm)*
 	;
 
-whereExpr
-	:	NOT* expr cmpExpr
+booleanTerm
+	:	booleanFactor (AND booleanFactor)*
 	;
 
-cmpExpr	:	cmpOp expr
-	| 	BETWEEN expr AND expr
-	| 	NOT BETWEEN expr AND expr
-	| 	LIKE expr
-	|	NOT LIKE expr
-	| 	IN '(' expr (',' expr)* ')'
+booleanFactor
+	:	NOT? booleanTest
 	;
 
-groupBy	:	expr (',' expr)*
+booleanTest
+	:	booleanPrimary
 	;
 
-havingClause
-	:	whereClause
+booleanPrimary
+	:	predicate
+	|	'(' searchCond ')'
 	;
 
-orderBy	:	expr (',' expr)*
+predicate
+	:	compareCond
+	|	rangeCond
+	|	likeCond
+	|	nullCond
+	|	inCond
+	;
+
+compareCond
+	:	rowVal cmpOp rowVal
+	;
+
+rangeCond
+	:	rowVal NOT? BETWEEN rowVal AND rowVal
+	;
+
+likeCond:	rowVal NOT? LIKE rowVal (ESCAPE rowVal)?
+	;
+
+nullCond:	rowVal IS NOT? NULL
+	;
+
+inCond	:	rowVal NOT? IN '(' rowVal (',' rowVal)* ')'
+	;
+
+groupBy	:	rowVal (',' rowVal)*
+	;
+
+orderBy	:	rowVal (',' rowVal)*
 	;
 
 cmpOp	:	('='|'<>'|'!='|'<'|'<='|'>'|'>=')
 	;
 
-expr	:	exprItem (mathOp exprItem)*
+rowVal	:	expr
+	|	NULL
 	;
 
-mathOp	:	('+'|'-'|'*'|'/'|'%') ;
+expr	:	term (('+'|'-') term)*
+	;
+
+term	:	factor (('*'|'/'|'%') factor)*
+	;
+
+factor	:	('+'|'-')? exprItem
+	;
 
 exprItem:	ident
 	| 	NUMBER
 	|	STRING
 	|	'(' expr ')'
+	|	NULL
 	;
 
 ident	:	IDENT ;
@@ -97,6 +132,9 @@ NOT	:	('N'|'n')('O'|'o')('T'|'t') ;
 EXISTS	:	('E'|'e')('X'|'x')('I'|'i')('S'|'s')('T'|'t')('S'|'s') ;
 BETWEEN	:	('B'|'b')('E'|'e')('T'|'t')('W'|'w')('E'|'e')('E'|'e')('N'|'n') ;
 LIKE 	: 	('L'|'l')('I'|'i')('K'|'k')('E'|'e') ;
+IS 	: 	('I'|'i')('S'|'s') ;
+NULL 	: 	('N'|'n')('U'|'u')('L'|'l')('L'|'l') ;
+ESCAPE	:	('E'|'e')('S'|'s')('C'|'c')('A'|'a')('P'|'p')('E'|'e') ;
 
 STRING	:	'\'' ( ~'\'' | '\'' '\'' )* '\'' ;
 
