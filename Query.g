@@ -7,6 +7,18 @@ options {
 	memoize=true;
 }
 
+@members {
+protected void mismatch(IntStream input, int ttype, BitSet follow)
+throws RecognitionException
+{ throw new MismatchedTokenException(ttype, input); }
+public void recoverFromMismatchedSet(
+IntStream input, RecognitionException e, BitSet follow)
+throws RecognitionException { throw e; }
+}
+@rulecatch {
+catch (RecognitionException re) { reportError(re); throw re; }
+}
+
 prog	:	query* ;
 
 query	:	selectStmt ';'
