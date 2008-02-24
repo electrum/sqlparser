@@ -1,8 +1,6 @@
 GRAMMAR=Query
 
-GENSRC=$(GRAMMAR)Lexer.java $(GRAMMAR)Parser.java
-
-GEN=$(GENSRC) $(GRAMMAR)__.g $(GRAMMAR).tokens 
+GENSRC=antlr/$(GRAMMAR)Lexer.java antlr/$(GRAMMAR)Parser.java
 
 
 .PHONY: all gen test clean
@@ -10,10 +8,11 @@ GEN=$(GENSRC) $(GRAMMAR)__.g $(GRAMMAR).tokens
 all: test
 
 gen:
-	java org.antlr.Tool $(GRAMMAR).g
+	java org.antlr.Tool -o antlr $(GRAMMAR).g
 
 test: gen
 	javac -Xmaxerrs 1 Test.java $(GENSRC)
 
 clean:
-	rm -f $(GEN) *.class
+	rm -f *.class
+	rm -rf antlr
