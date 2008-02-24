@@ -13,8 +13,7 @@ gen:
 	java org.antlr.Tool $(GRAMMAR).g
 
 test: gen
-	javac Test.java $(GENSRC)
+	javac -Xmaxerrs 1 Test.java $(GENSRC)
 
 clean:
 	rm -f $(GEN) *.class
-
