@@ -3,6 +3,8 @@ grammar Query;
 options {
 	output=AST;
 	ASTLabelType=CommonTree;
+	backtrack=true;
+	memoize=true;
 }
 
 prog	:	query* ;
@@ -110,7 +112,6 @@ exprItem:	ident
 	| 	NUMBER
 	|	STRING
 	|	'(' expr ')'
-	|	NULL
 	;
 
 ident	:	IDENT ;
