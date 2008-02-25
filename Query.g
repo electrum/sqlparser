@@ -116,6 +116,7 @@ subquery:	'(' selectStmt ')'
 	;
 
 rowVal	:	expr
+	|	subquery
 	|	STRING
 	|	NULL
 	;
