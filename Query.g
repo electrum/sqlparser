@@ -116,9 +116,19 @@ subquery:	'(' selectStmt ')'
 	;
 
 rowVal	:	expr
+	|	stringExpr
 	|	subquery
-	|	STRING
 	|	NULL
+	;
+
+stringExpr
+	:	STRING
+	|	ident
+	|	charFunction
+	;
+
+charFunction
+	:	SUBSTRING '(' stringExpr FROM expr (FOR expr)? ')'
 	;
 
 expr	:	term (('+'|'-') term)*
@@ -164,6 +174,8 @@ NULL 	: 	('N'|'n')('U'|'u')('L'|'l')('L'|'l') ;
 ESCAPE	:	('E'|'e')('S'|'s')('C'|'c')('A'|'a')('P'|'p')('E'|'e') ;
 ASC	:	('A'|'a')('S'|'s')('C'|'c') ;
 DESC	:	('D'|'d')('E'|'e')('S'|'s')('C'|'c') ;
+SUBSTRING:	('S'|'s')('U'|'u')('B'|'b')('S'|'s')('T'|'t')('R'|'r')('I'|'i')('N'|'n')('G'|'g') ;
+FOR	: 	('F'|'f')('O'|'o')('R'|'r') ;
 
 STRING	:	'\'' ( ~'\'' | '\'' '\'' )* '\'' ;
 
