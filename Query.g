@@ -49,7 +49,7 @@ tableList
 	;
 
 tableExpr
-	:	ident (AS? ident)?
+	:	(ident | subquery) (AS? ident)?
 	;
 
 searchCond
