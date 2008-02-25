@@ -95,19 +95,28 @@ likeCond:	rowVal NOT? LIKE rowVal (ESCAPE rowVal)?
 nullCond:	rowVal IS NOT? NULL
 	;
 
-inCond	:	rowVal NOT? IN '(' rowVal (',' rowVal)* ')'
+inCond	:	rowVal NOT? IN inPredicate
+	;
+
+inPredicate
+	:	'(' rowVal (',' rowVal)* ')'
+	|	subquery
 	;
 
 groupBy	:	rowVal (',' rowVal)*
 	;
 
-orderBy	:	rowVal (',' rowVal)*
+orderBy	:	rowVal (ASC|DESC)? (',' rowVal (ASC|DESC)?)*
 	;
 
 cmpOp	:	('='|'<>'|'!='|'<'|'<='|'>'|'>=')
 	;
 
+subquery:	'(' selectStmt ')'
+	;
+
 rowVal	:	expr
+	|	STRING
 	|	NULL
 	;
 
@@ -121,9 +130,13 @@ factor	:	('+'|'-')? exprItem
 	;
 
 exprItem:	ident
+	|	function
 	| 	NUMBER
-	|	STRING
 	|	'(' expr ')'
+	;
+
+function
+	:	ident '(' ('*' | ((DISTINCT | ALL)? rowVal)) ')'
 	;
 
 ident	:	IDENT ;
@@ -148,6 +161,8 @@ LIKE 	: 	('L'|'l')('I'|'i')('K'|'k')('E'|'e') ;
 IS 	: 	('I'|'i')('S'|'s') ;
 NULL 	: 	('N'|'n')('U'|'u')('L'|'l')('L'|'l') ;
 ESCAPE	:	('E'|'e')('S'|'s')('C'|'c')('A'|'a')('P'|'p')('E'|'e') ;
+ASC	:	('A'|'a')('S'|'s')('C'|'c') ;
+DESC	:	('D'|'d')('E'|'e')('S'|'s')('C'|'c') ;
 
 STRING	:	'\'' ( ~'\'' | '\'' '\'' )* '\'' ;
 
