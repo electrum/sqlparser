@@ -19,7 +19,7 @@ throws RecognitionException { throw e; }
 catch (RecognitionException re) { reportError(re); throw re; }
 }
 
-prog	:	query* ;
+prog	:	query* EOF ;
 
 query	:	selectStmt ';'
 	;
