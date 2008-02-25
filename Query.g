@@ -79,6 +79,7 @@ predicate
 	|	likeCond
 	|	nullCond
 	|	inCond
+	|	existsCond
 	;
 
 compareCond
@@ -101,6 +102,10 @@ inCond	:	rowVal NOT? IN inPredicate
 inPredicate
 	:	'(' rowVal (',' rowVal)* ')'
 	|	subquery
+	;
+
+existsCond
+	:	EXISTS subquery
 	;
 
 groupBy	:	rowVal (',' rowVal)*
