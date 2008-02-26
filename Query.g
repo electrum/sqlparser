@@ -182,7 +182,18 @@ exprItem:	ident
 	|	dateValue
 	|	intervalValue
 	|	extractExpr
+	|	caseExpr
 	|	'(' expr ')'
+	;
+
+caseExpr:	caseAbbrev
+	|	CASE rowVal (WHEN rowVal THEN rowVal)+ (ELSE rowVal)? END
+	|	CASE (WHEN searchCond THEN rowVal)+ (ELSE rowVal)? END
+	;
+
+caseAbbrev
+	:	NULLIF '(' rowVal ',' rowVal ')'
+	|	COALESCE '(' rowVal (',' rowVal)* ')'
 	;
 
 function
@@ -233,6 +244,13 @@ CURRENT_TIMESTAMP: ('C'|'c')('U'|'u')('R'|'r')('R'|'r')('E'|'e')('N'|'n')('T'|'t
 EXTRACT	:	('E'|'e')('X'|'x')('T'|'t')('R'|'r')('A'|'a')('C'|'c')('T'|'t') ;
 TIMEZONE_HOUR :	('T'|'t')('I'|'i')('M'|'m')('E'|'e')('Z'|'z')('O'|'o')('N'|'n')('E'|'e')('_')('H'|'h')('O'|'o')('U'|'u')('R'|'r') ;
 TIMEZONE_MINUTE : ('T'|'t')('I'|'i')('M'|'m')('E'|'e')('Z'|'z')('O'|'o')('N'|'n')('E'|'e')('_')('M'|'m')('I'|'i')('N'|'n')('U'|'u')('T'|'t')('E'|'e') ;
+COALESCE:	('C'|'c')('O'|'o')('A'|'a')('L'|'l')('E'|'e')('S'|'s')('C'|'c')('E'|'e') ;
+NULLIF	:	('N'|'n')('U'|'u')('L'|'l')('L'|'l')('I'|'i')('F'|'f') ;
+CASE	:	('C'|'c')('A'|'a')('S'|'s')('E'|'e') ;
+WHEN	:	('W'|'w')('H'|'h')('E'|'e')('N'|'n') ;
+THEN	:	('T'|'t')('H'|'h')('E'|'e')('N'|'n') ;
+ELSE	:	('E'|'e')('L'|'l')('S'|'s')('E'|'e') ;
+END	:	('E'|'e')('N'|'n')('D'|'d') ;
 
 STRING	:	'\'' ( ~'\'' | '\'' '\'' )* '\'' ;
 
