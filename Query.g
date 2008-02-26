@@ -158,6 +158,15 @@ charFunction
 	:	SUBSTRING '(' stringExpr FROM expr (FOR expr)? ')'
 	;
 
+extractExpr
+	:	EXTRACT '(' extractField FROM expr ')'
+	;
+
+extractField
+	:	YEAR | MONTH | DAY | HOUR | MINUTE | SECOND
+	|	TIMEZONE_HOUR | TIMEZONE_MINUTE
+	;
+
 expr	:	term (('+'|'-') term)*
 	;
 
@@ -172,6 +181,7 @@ exprItem:	ident
 	| 	number
 	|	dateValue
 	|	intervalValue
+	|	extractExpr
 	|	'(' expr ')'
 	;
 
@@ -220,6 +230,9 @@ SECOND	:	('S'|'s')('E'|'e')('C'|'c')('O'|'o')('N'|'n')('D'|'d') ;
 CURRENT_DATE:	('C'|'c')('U'|'u')('R'|'r')('R'|'r')('E'|'e')('N'|'n')('T'|'t')('_')('D'|'d')('A'|'a')('T'|'t')('E'|'e') ;
 CURRENT_TIME:	('C'|'c')('U'|'u')('R'|'r')('R'|'r')('E'|'e')('N'|'n')('T'|'t')('_')('T'|'t')('I'|'i')('M'|'m')('E'|'e') ;
 CURRENT_TIMESTAMP: ('C'|'c')('U'|'u')('R'|'r')('R'|'r')('E'|'e')('N'|'n')('T'|'t')('_')('T'|'t')('I'|'i')('M'|'m')('E'|'e')('S'|'s')('T'|'t')('A'|'a')('M'|'m')('P'|'p') ;
+EXTRACT	:	('E'|'e')('X'|'x')('T'|'t')('R'|'r')('A'|'a')('C'|'c')('T'|'t') ;
+TIMEZONE_HOUR :	('T'|'t')('I'|'i')('M'|'m')('E'|'e')('Z'|'z')('O'|'o')('N'|'n')('E'|'e')('_')('H'|'h')('O'|'o')('U'|'u')('R'|'r') ;
+TIMEZONE_MINUTE : ('T'|'t')('I'|'i')('M'|'m')('E'|'e')('Z'|'z')('O'|'o')('N'|'n')('E'|'e')('_')('M'|'m')('I'|'i')('N'|'n')('U'|'u')('T'|'t')('E'|'e') ;
 
 STRING	:	'\'' ( ~'\'' | '\'' '\'' )* '\'' ;
 
