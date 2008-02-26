@@ -7,7 +7,6 @@ public class Test {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         QueryParser parser = new QueryParser(tokens);
         QueryParser.prog_return root = parser.prog();
-        System.out.println(root.tree.toString());
         System.out.println(root.tree.toStringTree());
     }
 }
