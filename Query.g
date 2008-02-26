@@ -126,6 +126,28 @@ rowVal	:	expr
 	|	NULL
 	;
 
+dateValue
+	:	DATE STRING
+	|	TIME STRING
+	|	TIMESTAMP STRING
+	|	dateFunction
+	;
+
+intervalValue
+	:	INTERVAL ('+'|'-')? STRING intervalQualifier
+	;
+
+intervalQualifier
+	:	(YEAR|MONTH|DAY|HOUR|MINUTE) ('(' INTEGER ')')?
+	|	SECOND ('(' INTEGER (',' INTEGER)?)?
+	;
+
+dateFunction
+	:	CURRENT_DATE
+	|	CURRENT_TIME ('(' INTEGER ')')?
+	|	CURRENT_TIMESTAMP ('(' INTEGER ')')?
+	;
+
 stringExpr
 	:	STRING
 	|	ident
@@ -147,7 +169,9 @@ factor	:	('+'|'-')? exprItem
 
 exprItem:	ident
 	|	function
-	| 	NUMBER
+	| 	number
+	|	dateValue
+	|	intervalValue
 	|	'(' expr ')'
 	;
 
@@ -155,7 +179,9 @@ function
 	:	ident '(' ('*' | ((DISTINCT | ALL)? rowVal)) ')'
 	;
 
-ident	:	IDENT ;
+number	:	NUMBER | INTEGER ;
+
+ident	:	IDENT ('.' IDENT)? ;
 
 SELECT	:	('S'|'s')('E'|'e')('L'|'l')('E'|'e')('C'|'c')('T'|'t') ;
 FROM 	: 	('F'|'f')('R'|'r')('O'|'o')('M'|'m') ;
@@ -181,11 +207,25 @@ ASC	:	('A'|'a')('S'|'s')('C'|'c') ;
 DESC	:	('D'|'d')('E'|'e')('S'|'s')('C'|'c') ;
 SUBSTRING:	('S'|'s')('U'|'u')('B'|'b')('S'|'s')('T'|'t')('R'|'r')('I'|'i')('N'|'n')('G'|'g') ;
 FOR	: 	('F'|'f')('O'|'o')('R'|'r') ;
+DATE	:	('D'|'d')('A'|'a')('T'|'t')('E'|'e') ;
+TIME	:	('T'|'t')('I'|'i')('M'|'m')('E'|'e') ;
+TIMESTAMP:	('T'|'t')('I'|'i')('M'|'m')('E'|'e')('S'|'s')('T'|'t')('A'|'a')('M'|'m')('P'|'p') ;
+INTERVAL:	('I'|'i')('N'|'n')('T'|'t')('E'|'e')('R'|'r')('V'|'v')('A'|'a')('L'|'l') ;
+YEAR	:	('Y'|'y')('E'|'e')('A'|'a')('R'|'r') ;
+MONTH	:	('M'|'m')('O'|'o')('N'|'n')('T'|'t')('H'|'h') ;
+DAY	:	('D'|'d')('A'|'a')('Y'|'y') ;
+HOUR	:	('H'|'h')('O'|'o')('U'|'u')('R'|'r') ;
+MINUTE	:	('M'|'m')('I'|'i')('N'|'n')('U'|'u')('T'|'t')('E'|'e') ;
+SECOND	:	('S'|'s')('E'|'e')('C'|'c')('O'|'o')('N'|'n')('D'|'d') ;
+CURRENT_DATE:	('C'|'c')('U'|'u')('R'|'r')('R'|'r')('E'|'e')('N'|'n')('T'|'t')('_')('D'|'d')('A'|'a')('T'|'t')('E'|'e') ;
+CURRENT_TIME:	('C'|'c')('U'|'u')('R'|'r')('R'|'r')('E'|'e')('N'|'n')('T'|'t')('_')('T'|'t')('I'|'i')('M'|'m')('E'|'e') ;
+CURRENT_TIMESTAMP: ('C'|'c')('U'|'u')('R'|'r')('R'|'r')('E'|'e')('N'|'n')('T'|'t')('_')('T'|'t')('I'|'i')('M'|'m')('E'|'e')('S'|'s')('T'|'t')('A'|'a')('M'|'m')('P'|'p') ;
 
 STRING	:	'\'' ( ~'\'' | '\'' '\'' )* '\'' ;
 
 SQUOTE	:	'\'' ;
 
+INTEGER	:	('0'..'9')+ ;
 NUMBER	:	('0'..'9')+ ('.' ('0'..'9')+)? ;
 
 IDENT	:	('_'|'A'..'Z'|'a'..'z') ('_'|'A'..'Z'|'a'..'z'|'0'..'9')* ;
