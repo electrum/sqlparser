@@ -45,11 +45,31 @@ columnExpr
 	;
 
 tableList
-	:	tableExpr (',' tableExpr)*
+	:	tableRef (',' tableRef)*
 	;
 
-tableExpr
-	:	(ident | subquery) (AS? ident)?
+tableRef:	 tablePrimary tableJoin*
+	;
+
+tablePrimary
+	:	(ident | subquery) corrSpec? | '(' tablePrimary tableJoin ')'
+	;
+
+tableJoin
+	:	CROSS JOIN tableRef
+	|	joinType JOIN tableRef joinSpec
+	|	NATURAL joinType JOIN tableRef
+	;
+
+joinType:	INNER?
+	|	(LEFT | RIGHT | FULL) OUTER?
+	;
+
+joinSpec:	ON searchCond
+	|	USING '(' ident (',' ident)* ')'
+	;
+
+corrSpec:	AS? ident ('(' ident (',' ident)* ')')?
 	;
 
 searchCond
@@ -251,6 +271,16 @@ WHEN	:	('W'|'w')('H'|'h')('E'|'e')('N'|'n') ;
 THEN	:	('T'|'t')('H'|'h')('E'|'e')('N'|'n') ;
 ELSE	:	('E'|'e')('L'|'l')('S'|'s')('E'|'e') ;
 END	:	('E'|'e')('N'|'n')('D'|'d') ;
+JOIN	:	('J'|'j')('O'|'o')('I'|'i')('N'|'n') ;
+CROSS	:	('C'|'c')('R'|'r')('O'|'o')('S'|'s')('S'|'s') ;
+OUTER	:	('O'|'o')('U'|'u')('T'|'t')('E'|'e')('R'|'r') ;
+INNER	:	('I'|'i')('N'|'n')('N'|'n')('E'|'e')('R'|'r') ;
+LEFT	:	('L'|'l')('E'|'e')('F'|'f')('T'|'t') ;
+RIGHT	:	('R'|'r')('I'|'i')('G'|'g')('H'|'h')('T'|'t') ;
+FULL	:	('F'|'f')('U'|'u')('L'|'l')('L'|'l') ;
+NATURAL	:	('N'|'n')('A'|'a')('T'|'t')('U'|'u')('R'|'r')('A'|'a')('L'|'l') ;
+USING	:	('U'|'u')('S'|'s')('I'|'i')('N'|'n')('G'|'g') ;
+ON	:	('O'|'o')('N'|'n') ;
 
 STRING	:	'\'' ( ~'\'' | '\'' '\'' )* '\'' ;
 
