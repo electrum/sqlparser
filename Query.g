@@ -7,6 +7,22 @@ options {
 	memoize=true;
 }
 
+tokens {
+	QUERY;
+	GROUPBY;
+	ORDERBY;
+	SELECT_LIST;
+	SELECT_ELEMENT;
+	CORR_LIST;
+	SUBQUERY;
+	TABLE;
+	CROSS_JOIN;
+	INNER_JOIN;
+	LEFT_JOIN;
+	RIGHT_JOIN;
+	FULL_JOIN;
+}
+
 @members {
 protected void mismatch(IntStream input, int ttype, BitSet follow)
 throws RecognitionException
@@ -19,17 +35,46 @@ throws RecognitionException { throw e; }
 catch (RecognitionException re) { reportError(re); throw re; }
 }
 
-prog	:	query* EOF ;
+prog	:	query* EOF -> query*
+	;
 
-query	:	selectStmt ';'
+query	:	queryType ';' -> ^(QUERY queryType)
+	;
+
+queryType
+	:	selectStmt -> ^(SELECT selectStmt)
 	;
 
 selectStmt
-	:	SELECT selectExpr
-		FROM tableList
-		(WHERE searchCond)?
-		(GROUP BY groupBy (HAVING searchCond)?)?
-		(ORDER BY orderBy)?
+	:	selectClause
+		fromClause
+		whereClause?
+		(groupClause havingClause?)?
+		orderClause?
+	;
+
+selectClause
+	:	SELECT selectExpr -> ^(SELECT_LIST selectExpr)
+	;
+
+fromClause
+	:	FROM tableList -> ^(FROM tableList)
+	;
+
+whereClause
+	:	WHERE searchCond -> ^(WHERE searchCond)
+	;
+
+groupClause
+	:	GROUP BY groupBy -> ^(GROUPBY groupBy)
+	;
+
+havingClause
+	:	HAVING searchCond -> ^(HAVING searchCond)
+	;
+
+orderClause
+	:	ORDER BY orderBy -> ^(ORDERBY orderBy)
 	;
 
 selectExpr
@@ -37,39 +82,46 @@ selectExpr
 	;
 
 columnList
-	:	columnExpr (',' columnExpr)*
+	:	columnExpr (',' columnExpr)* -> columnExpr+
 	;
 
 columnExpr
-	:	rowVal (AS? ident)?
+	:	rowVal (AS? ident)? -> ^(SELECT_ELEMENT rowVal ident?)
 	;
 
 tableList
-	:	tableRef (',' tableRef)*
+	:	tableRef (',' tableRef)* -> tableRef+
 	;
 
 tableRef:	 tablePrimary tableJoin*
 	;
 
 tablePrimary
-	:	(ident | subquery) corrSpec? | '(' tablePrimary tableJoin ')'
+	:	ident corrSpec?                -> ^(TABLE ident corrSpec?)
+	|	subquery corrSpec?             -> ^(SUBQUERY subquery corrSpec?)
+	|	'(' tablePrimary tableJoin ')' -> ^(JOIN tablePrimary tableJoin)
 	;
 
 tableJoin
-	:	CROSS JOIN tableRef
-	|	joinType JOIN tableRef joinSpec
-	|	NATURAL joinType JOIN tableRef
+	:	CROSS JOIN tableRef             -> ^(CROSS_JOIN tableRef)
+	|	joinType JOIN tableRef joinSpec -> ^(joinType tableRef joinSpec)
+	|	NATURAL joinType JOIN tableRef  -> ^(joinType tableRef NATURAL)
 	;
 
-joinType:	INNER?
-	|	(LEFT | RIGHT | FULL) OUTER?
+joinType:	INNER?       -> INNER_JOIN
+	|	LEFT OUTER?  -> LEFT_JOIN
+	|	RIGHT OUTER? -> RIGHT_JOIN
+	|	FULL OUTER?  -> FULL_JOIN
 	;
 
-joinSpec:	ON searchCond
-	|	USING '(' ident (',' ident)* ')'
+joinSpec:	ON searchCond                    -> ^(ON searchCond)
+	|	USING '(' ident (',' ident)* ')' -> ^(USING ident+)
 	;
 
-corrSpec:	AS? ident ('(' ident (',' ident)* ')')?
+corrSpec:	AS? ident corrList? -> ident corrList?
+	;
+
+corrList:	'(' ident (',' ident)* ')' -> ^(CORR_LIST ident+)
 	;
 
 searchCond
@@ -137,7 +189,7 @@ orderBy	:	rowVal (ASC|DESC)? (',' rowVal (ASC|DESC)?)*
 cmpOp	:	('='|'<>'|'!='|'<'|'<='|'>'|'>=')
 	;
 
-subquery:	'(' selectStmt ')'
+subquery:	'(' selectStmt ')' -> ^(SELECT selectStmt)
 	;
 
 rowVal	:	expr
