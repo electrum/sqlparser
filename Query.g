@@ -97,9 +97,9 @@ tableRef:	 tablePrimary tableJoin*
 	;
 
 tablePrimary
-	:	ident corrSpec?                -> ^(TABLE ident corrSpec?)
-	|	subquery corrSpec?             -> ^(SUBQUERY subquery corrSpec?)
-	|	'(' tablePrimary tableJoin ')' -> ^(JOIN tablePrimary tableJoin)
+	:	ident corrSpec?                 -> ^(TABLE ident corrSpec?)
+	|	subquery corrSpec?              -> ^(SUBQUERY subquery corrSpec?)
+	|	'(' tablePrimary tableJoin+ ')' -> tablePrimary tableJoin+
 	;
 
 tableJoin
