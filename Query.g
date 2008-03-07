@@ -11,6 +11,7 @@ tokens {
 	QUERY;
 	GROUPBY;
 	ORDERBY;
+	SORT_SPEC;
 	SELECT_LIST;
 	SELECT_ELEMENT;
 	CORR_LIST;
@@ -21,6 +22,10 @@ tokens {
 	LEFT_JOIN;
 	RIGHT_JOIN;
 	FULL_JOIN;
+	IN_LIST;
+	SIMPLE_CASE;
+	SEARCHED_CASE;
+	FUNCTION_CALL;
 }
 
 @members {
@@ -78,7 +83,10 @@ orderClause
 	;
 
 selectExpr
-	:	(ALL | DISTINCT)? ('*' | columnList)
+	:	setQuant? ('*' | columnList)
+	;
+
+setQuant:	DISTINCT | ALL
 	;
 
 columnList
@@ -125,15 +133,18 @@ corrList:	'(' ident (',' ident)* ')' -> ^(CORR_LIST ident+)
 	;
 
 searchCond
-	:	booleanTerm (OR booleanTerm)*
+	:	booleanTerm (OR booleanTerm)+ -> ^(OR booleanTerm+)
+	|	booleanTerm
 	;
 
 booleanTerm
-	:	booleanFactor (AND booleanFactor)*
+	:	booleanFactor (AND booleanFactor)+ -> ^(AND booleanFactor+)
+	|	booleanFactor
 	;
 
 booleanFactor
-	:	NOT? booleanTest
+	:	NOT booleanTest -> ^(NOT booleanTest)
+	|	booleanTest
 	;
 
 booleanTest
@@ -142,7 +153,7 @@ booleanTest
 
 booleanPrimary
 	:	predicate
-	|	'(' searchCond ')'
+	|	'(' searchCond ')' -> searchCond
 	;
 
 predicate
@@ -155,38 +166,49 @@ predicate
 	;
 
 compareCond
-	:	rowVal cmpOp rowVal
+	:	rowVal cmpOp rowVal -> ^(cmpOp rowVal rowVal)
 	;
 
 rangeCond
-	:	rowVal NOT? BETWEEN rowVal AND rowVal
+	:	rowVal     BETWEEN rowVal AND rowVal ->       ^(BETWEEN rowVal rowVal rowVal)
+	|	rowVal NOT BETWEEN rowVal AND rowVal -> ^(NOT ^(BETWEEN rowVal rowVal rowVal))
 	;
 
-likeCond:	rowVal NOT? LIKE rowVal (ESCAPE rowVal)?
+likeCond:	rowVal     LIKE rowVal (ESCAPE rowVal)? ->       ^(LIKE rowVal rowVal (ESCAPE rowVal)?)
+	|	rowVal NOT LIKE rowVal (ESCAPE rowVal)? -> ^(NOT ^(LIKE rowVal rowVal (ESCAPE rowVal)?))
 	;
 
-nullCond:	rowVal IS NOT? NULL
+nullCond:	rowVal IS     NULL ->       ^(IS rowVal NULL)
+	|	rowVal IS NOT NULL -> ^(NOT ^(IS rowVal NULL))
 	;
 
-inCond	:	rowVal NOT? IN inPredicate
+inCond	:	rowVal     IN inPredicate ->       ^(IN rowVal inPredicate)
+	|	rowVal NOT IN inPredicate -> ^(NOT ^(IN rowVal inPredicate))
 	;
 
 inPredicate
-	:	'(' rowVal (',' rowVal)* ')'
+	:	'(' rowVal (',' rowVal)* ')' -> ^(IN_LIST rowVal+)
 	|	subquery
 	;
 
 existsCond
-	:	EXISTS subquery
+	:	EXISTS subquery -> ^(EXISTS subquery)
 	;
 
-groupBy	:	rowVal (',' rowVal)*
+groupBy	:	rowVal (',' rowVal)* -> rowVal+
 	;
 
-orderBy	:	rowVal (ASC|DESC)? (',' rowVal (ASC|DESC)?)*
+orderBy	:	sortSpec (',' sortSpec)* -> sortSpec+
 	;
 
-cmpOp	:	('='|'<>'|'!='|'<'|'<='|'>'|'>=')
+sortSpec:	rowVal orderSpec? -> ^(SORT_SPEC rowVal orderSpec?)
+	;
+
+orderSpec
+	:	ASC | DESC
+	;
+
+cmpOp	:	EQ | NEQ | LT | LTE | GT | GTE
 	;
 
 subquery:	'(' selectStmt ')' -> ^(SELECT selectStmt)
@@ -239,10 +261,10 @@ extractField
 	|	TIMEZONE_HOUR | TIMEZONE_MINUTE
 	;
 
-expr	:	term (('+'|'-') term)*
+expr	:	term (('+'|'-')^ term)*
 	;
 
-term	:	factor (('*'|'/'|'%') factor)*
+term	:	factor (('*'|'/'|'%')^ factor)*
 	;
 
 factor	:	('+'|'-')? exprItem
@@ -255,21 +277,42 @@ exprItem:	ident
 	|	intervalValue
 	|	extractExpr
 	|	caseExpr
-	|	'(' expr ')'
+	|	'(' expr ')' -> expr
 	;
 
 caseExpr:	caseAbbrev
-	|	CASE rowVal (WHEN rowVal THEN rowVal)+ (ELSE rowVal)? END
-	|	CASE (WHEN searchCond THEN rowVal)+ (ELSE rowVal)? END
+	|	simpleCase
+	|	searchedCase
 	;
 
 caseAbbrev
-	:	NULLIF '(' rowVal ',' rowVal ')'
-	|	COALESCE '(' rowVal (',' rowVal)* ')'
+	:	NULLIF '(' rowVal ',' rowVal ')'      -> ^(NULLIF rowVal rowVal)
+	|	COALESCE '(' rowVal (',' rowVal)* ')' -> ^(COALESCE rowVal+)
 	;
 
-function
-	:	ident '(' ('*' | ((DISTINCT | ALL)? rowVal)) ')'
+simpleCase
+	:	CASE rowVal simpleWhen+ elseClause? END -> ^(SIMPLE_CASE rowVal simpleWhen+ elseClause?)
+	;
+
+simpleWhen
+	:	WHEN rowVal THEN rowVal -> ^(WHEN rowVal rowVal)
+	;
+
+searchedCase
+	:	CASE searchedWhen+ elseClause? END -> ^(SEARCHED_CASE searchedWhen+ elseClause?)
+	;
+
+searchedWhen
+	:	WHEN searchCond THEN rowVal -> ^(WHEN searchCond rowVal)
+	;
+
+elseClause
+	:	ELSE rowVal -> ^(ELSE rowVal)
+	;
+
+function:	ident '(' '*' ')'                  -> ^(FUNCTION_CALL ident '*')
+	|	ident '(' setQuant rowVal ')'      -> ^(FUNCTION_CALL ident setQuant rowVal)
+	|	ident '(' rowVal (',' rowVal)* ')' -> ^(FUNCTION_CALL ident rowVal+)
 	;
 
 number	:	NUMBER | INTEGER ;
@@ -333,6 +376,13 @@ FULL	:	('F'|'f')('U'|'u')('L'|'l')('L'|'l') ;
 NATURAL	:	('N'|'n')('A'|'a')('T'|'t')('U'|'u')('R'|'r')('A'|'a')('L'|'l') ;
 USING	:	('U'|'u')('S'|'s')('I'|'i')('N'|'n')('G'|'g') ;
 ON	:	('O'|'o')('N'|'n') ;
+
+EQ	:	'=' ;
+NEQ	:	'<>' | '!=';
+LT	:	'<' ;
+LTE	:	'<=' ;
+GT	:	'>' ;
+GTE	:	'>=' ;
 
 STRING	:	'\'' ( ~'\'' | '\'' '\'' )* '\'' ;
 
