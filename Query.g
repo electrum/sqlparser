@@ -26,6 +26,7 @@ tokens {
 	SIMPLE_CASE;
 	SEARCHED_CASE;
 	FUNCTION_CALL;
+	NEGATIVE;
 }
 
 @members {
@@ -267,7 +268,8 @@ expr	:	term (('+'|'-')^ term)*
 term	:	factor (('*'|'/'|'%')^ factor)*
 	;
 
-factor	:	('+'|'-')? exprItem
+factor	:	'+'? exprItem -> exprItem
+	|	'-' exprItem  -> ^(NEGATIVE exprItem)
 	;
 
 exprItem:	ident
