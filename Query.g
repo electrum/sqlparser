@@ -17,6 +17,7 @@ tokens {
 	CORR_LIST;
 	SUBQUERY;
 	TABLE;
+	JOINED_TABLE;
 	CROSS_JOIN;
 	INNER_JOIN;
 	LEFT_JOIN;
@@ -106,9 +107,12 @@ tableRef:	 tablePrimary tableJoin*
 	;
 
 tablePrimary
-	:	ident corrSpec?                 -> ^(TABLE ident corrSpec?)
-	|	subquery corrSpec?              -> ^(SUBQUERY subquery corrSpec?)
-	|	'(' tablePrimary tableJoin+ ')' -> tablePrimary tableJoin+
+	:	ident corrSpec?   -> ^(TABLE ident corrSpec?)
+	|	subquery corrSpec -> ^(SUBQUERY subquery corrSpec)
+	|	subJoin corrSpec? -> ^(JOINED_TABLE subJoin corrSpec?)
+	;
+
+subJoin	:	'(' tablePrimary tableJoin+ ')' -> tablePrimary tableJoin+
 	;
 
 tableJoin
