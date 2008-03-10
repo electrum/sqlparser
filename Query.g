@@ -99,7 +99,7 @@ columnExpr
 	;
 
 tableList
-	:	tableRef (',' tableRef)* -> tableRef+
+	:	tableRef (',' tableRef)* -> tableRef ^(CROSS_JOIN tableRef)*
 	;
 
 tableRef:	 tablePrimary tableJoin*
@@ -112,9 +112,9 @@ tablePrimary
 	;
 
 tableJoin
-	:	CROSS JOIN tableRef             -> ^(CROSS_JOIN tableRef)
-	|	joinType JOIN tableRef joinSpec -> ^(joinType tableRef joinSpec)
-	|	NATURAL joinType JOIN tableRef  -> ^(joinType tableRef NATURAL)
+	:	CROSS JOIN tablePrimary             -> ^(CROSS_JOIN tablePrimary)
+	|	joinType JOIN tablePrimary joinSpec -> ^(joinType tablePrimary joinSpec)
+	|	NATURAL joinType JOIN tablePrimary  -> ^(joinType tablePrimary NATURAL)
 	;
 
 joinType:	INNER?       -> INNER_JOIN
