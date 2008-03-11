@@ -226,25 +226,34 @@ rowVal	:	expr
 	;
 
 dateValue
-	:	DATE STRING
-	|	TIME STRING
-	|	TIMESTAMP STRING
+	:	DATE STRING      -> ^(DATE STRING)
+	|	TIME STRING      -> ^(TIME STRING)
+	|	TIMESTAMP STRING -> ^(TIMESTAMP STRING)
 	|	dateFunction
 	;
 
 intervalValue
-	:	INTERVAL ('+'|'-')? STRING intervalQualifier
+	:	INTERVAL intervalSign? STRING intervalQualifier -> ^(INTERVAL STRING intervalQualifier intervalSign?)
+	;
+
+intervalSign
+	:	'+' ->
+	|	'-' -> NEGATIVE
 	;
 
 intervalQualifier
-	:	(YEAR|MONTH|DAY|HOUR|MINUTE) ('(' INTEGER ')')?
-	|	SECOND ('(' INTEGER (',' INTEGER)?)?
+	:	nonSecond ('(' p=INTEGER ')')?               -> ^(nonSecond $p?)
+	|	SECOND ('(' p=INTEGER (',' s=INTEGER)? ')')? -> ^(SECOND $p? $s?)
+	;
+
+nonSecond
+	:	YEAR | MONTH | DAY | HOUR | MINUTE
 	;
 
 dateFunction
-	:	CURRENT_DATE
-	|	CURRENT_TIME ('(' INTEGER ')')?
-	|	CURRENT_TIMESTAMP ('(' INTEGER ')')?
+	:	CURRENT_DATE                         -> ^(FUNCTION_CALL CURRENT_DATE)
+	|	CURRENT_TIME ('(' INTEGER ')')?      -> ^(FUNCTION_CALL CURRENT_TIME INTEGER?)
+	|	CURRENT_TIMESTAMP ('(' INTEGER ')')? -> ^(FUNCTION_CALL CURRENT_TIMESTAMP INTEGER?)
 	;
 
 stringExpr
@@ -258,7 +267,7 @@ charFunction
 	;
 
 extractExpr
-	:	EXTRACT '(' extractField FROM expr ')'
+	:	EXTRACT '(' extractField FROM expr ')' -> ^(FUNCTION_CALL EXTRACT extractField expr)
 	;
 
 extractField
