@@ -316,7 +316,7 @@ elseClause
 	:	ELSE rowVal -> ^(ELSE rowVal)
 	;
 
-function:	ident '(' '*' ')'                  -> ^(FUNCTION_CALL ident '*')
+function:	ident '(' '*' ')'                  -> ^(FUNCTION_CALL ident ALL)
 	|	ident '(' setQuant rowVal ')'      -> ^(FUNCTION_CALL ident setQuant rowVal)
 	|	ident '(' rowVal (',' rowVal)* ')' -> ^(FUNCTION_CALL ident rowVal+)
 	;
