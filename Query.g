@@ -254,7 +254,7 @@ stringExpr
 	;
 
 charFunction
-	:	SUBSTRING '(' stringExpr FROM expr (FOR expr)? ')'
+	:	SUBSTRING '(' stringExpr FROM expr (FOR expr)? ')' -> ^(FUNCTION_CALL SUBSTRING stringExpr expr expr?)
 	;
 
 extractExpr
