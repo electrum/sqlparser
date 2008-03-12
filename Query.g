@@ -28,6 +28,7 @@ tokens {
 	SEARCHED_CASE;
 	FUNCTION_CALL;
 	NEGATIVE;
+	QNAME;
 }
 
 @members {
@@ -107,7 +108,7 @@ tableRef:	 tablePrimary tableJoin*
 	;
 
 tablePrimary
-	:	ident corrSpec?   -> ^(TABLE ident corrSpec?)
+	:	qname corrSpec?   -> ^(TABLE qname corrSpec?)
 	|	subquery corrSpec -> ^(SUBQUERY subquery corrSpec)
 	|	subJoin corrSpec? -> ^(JOINED_TABLE subJoin corrSpec?)
 	;
@@ -258,7 +259,7 @@ dateFunction
 
 stringExpr
 	:	STRING
-	|	ident
+	|	qname
 	|	charFunction
 	;
 
@@ -285,7 +286,7 @@ factor	:	'+'? exprItem -> exprItem
 	|	'-' exprItem  -> ^(NEGATIVE exprItem)
 	;
 
-exprItem:	ident
+exprItem:	qname
 	|	function
 	| 	number
 	|	dateValue
@@ -325,14 +326,17 @@ elseClause
 	:	ELSE rowVal -> ^(ELSE rowVal)
 	;
 
-function:	ident '(' '*' ')'                  -> ^(FUNCTION_CALL ident ALL)
-	|	ident '(' setQuant rowVal ')'      -> ^(FUNCTION_CALL ident setQuant rowVal)
-	|	ident '(' rowVal (',' rowVal)* ')' -> ^(FUNCTION_CALL ident rowVal+)
+function:	qname '(' '*' ')'                  -> ^(FUNCTION_CALL qname ALL)
+	|	qname '(' setQuant rowVal ')'      -> ^(FUNCTION_CALL qname setQuant rowVal)
+	|	qname '(' rowVal (',' rowVal)* ')' -> ^(FUNCTION_CALL qname rowVal+)
 	;
 
-number	:	NUMBER | INTEGER ;
+qname	:	a=ident ('.' b=ident ('.' c=ident)?)? -> ^(QNAME $a $b? $c?)
+	;
 
-ident	:	IDENT ('.' IDENT)? ;
+ident	:	IDENT ;
+
+number	:	NUMBER | INTEGER ;
 
 SELECT	:	('S'|'s')('E'|'e')('L'|'l')('E'|'e')('C'|'c')('T'|'t') ;
 FROM 	: 	('F'|'f')('R'|'r')('O'|'o')('M'|'m') ;
