@@ -29,6 +29,10 @@ tokens {
 	FUNCTION_CALL;
 	NEGATIVE;
 	QNAME;
+	CREATE_TABLE;
+	TABLE_ELEMENT_LIST;
+	COLUMN_DEF;
+	NOT_NULL;
 }
 
 @members {
@@ -50,7 +54,8 @@ query	:	queryType ';' -> ^(QUERY queryType)
 	;
 
 queryType
-	:	selectStmt -> ^(SELECT selectStmt)
+	:	selectStmt 	-> ^(SELECT selectStmt)
+	|	createTableStmt -> ^(CREATE_TABLE createTableStmt)
 	;
 
 selectStmt
@@ -331,6 +336,59 @@ function:	qname '(' '*' ')'                  -> ^(FUNCTION_CALL qname ALL)
 	|	qname '(' rowVal (',' rowVal)* ')' -> ^(FUNCTION_CALL qname rowVal+)
 	;
 
+createTableStmt
+	:	CREATE TABLE qname tableElementList -> qname tableElementList
+	;
+
+tableElementList
+	:	'(' tableElement (',' tableElement)*  ')' -> ^(TABLE_ELEMENT_LIST tableElement+)
+	;
+
+tableElement
+	:	columnDef
+	;
+
+columnDef
+	:	ident dataType columnConstDef* -> ^(COLUMN_DEF ident dataType columnConstDef*)
+	;
+
+dataType:	charType
+	|	exactNumType
+	|	dateType
+	;
+
+charType:	CHAR charlen?              -> ^(CHAR charlen?)
+	|	CHARACTER charlen?         -> ^(CHAR charlen?)
+	|	VARCHAR charlen?           -> ^(VARCHAR charlen?)
+	|	CHAR VARYING charlen?      -> ^(VARCHAR charlen?)
+	|	CHARACTER VARYING charlen? -> ^(VARCHAR charlen?)
+	;
+
+charlen	:	'(' integer ')' -> integer
+	;
+
+exactNumType
+	:	NUMERIC numlen? -> ^(NUMERIC numlen?)
+	|	DECIMAL numlen? -> ^(NUMERIC numlen?)
+	|	DEC numlen?     -> ^(NUMERIC numlen?)
+	|	INTEGER         -> ^(INTEGER)
+	|	INT             -> ^(INTEGER)
+	;
+
+numlen	:	'(' p=integer (',' s=integer)? ')' -> $p $s?
+	;
+
+dateType:	DATE -> ^(DATE)
+	;
+
+columnConstDef
+	:	columnConst -> ^(CONSTRAINT columnConst)
+	;
+
+columnConst
+	:	NOT NULL -> NOT_NULL
+	;
+
 qname	:	a=ident ('.' b=ident ('.' c=ident)?)? -> ^(QNAME $a $b? $c?)
 	;
 
@@ -397,6 +455,19 @@ FULL	:	('F'|'f')('U'|'u')('L'|'l')('L'|'l') ;
 NATURAL	:	('N'|'n')('A'|'a')('T'|'t')('U'|'u')('R'|'r')('A'|'a')('L'|'l') ;
 USING	:	('U'|'u')('S'|'s')('I'|'i')('N'|'n')('G'|'g') ;
 ON	:	('O'|'o')('N'|'n') ;
+CREATE 	:	('C'|'c')('R'|'r')('E'|'e')('A'|'a')('T'|'t')('E'|'e') ;
+TABLE 	:	('T'|'t')('A'|'a')('B'|'b')('L'|'l')('E'|'e') ;
+CHAR	:	('C'|'c')('H'|'h')('A'|'a')('R'|'r') ;
+CHARACTER:	('C'|'c')('H'|'h')('A'|'a')('R'|'r')('A'|'a')('C'|'c')('T'|'t')('E'|'e')('R'|'r') ;
+VARYING	:	('V'|'v')('A'|'a')('R'|'r')('Y'|'y')('I'|'i')('N'|'n')('G'|'g') ;
+VARCHAR	:	('V'|'v')('A'|'a')('R'|'r')('C'|'c')('H'|'h')('A'|'a')('R'|'r') ;
+NUMERIC	:	('N'|'n')('U'|'u')('M'|'m')('E'|'e')('R'|'r')('I'|'i')('C'|'c') ;
+NUMBER	:	('N'|'n')('U'|'u')('M'|'m')('B'|'b')('E'|'e')('R'|'r') ;
+DECIMAL	:	('D'|'d')('E'|'e')('C'|'c')('I'|'i')('M'|'m')('A'|'a')('L'|'l') ;
+DEC	:	('D'|'d')('E'|'e')('C'|'c') ;
+INTEGER	:	('I'|'i')('N'|'n')('T'|'t')('E'|'e')('G'|'g')('E'|'e')('R'|'r') ;
+INT	:	('I'|'i')('N'|'n')('T'|'t') ;
+CONSTRAINT:	('C'|'c')('O'|'o')('N'|'n')('S'|'s')('T'|'t')('R'|'r')('A'|'a')('I'|'i')('N'|'n')('T'|'t') ;
 
 EQ	:	'=' ;
 NEQ	:	'<>' | '!=';
