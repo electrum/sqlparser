@@ -243,8 +243,8 @@ intervalSign
 	;
 
 intervalQualifier
-	:	nonSecond ('(' p=INTEGER ')')?               -> ^(nonSecond $p?)
-	|	SECOND ('(' p=INTEGER (',' s=INTEGER)? ')')? -> ^(SECOND $p? $s?)
+	:	nonSecond ('(' p=integer ')')?               -> ^(nonSecond $p?)
+	|	SECOND ('(' p=integer (',' s=integer)? ')')? -> ^(SECOND $p? $s?)
 	;
 
 nonSecond
@@ -253,8 +253,8 @@ nonSecond
 
 dateFunction
 	:	CURRENT_DATE                         -> ^(FUNCTION_CALL CURRENT_DATE)
-	|	CURRENT_TIME ('(' INTEGER ')')?      -> ^(FUNCTION_CALL CURRENT_TIME INTEGER?)
-	|	CURRENT_TIMESTAMP ('(' INTEGER ')')? -> ^(FUNCTION_CALL CURRENT_TIMESTAMP INTEGER?)
+	|	CURRENT_TIME ('(' integer ')')?      -> ^(FUNCTION_CALL CURRENT_TIME integer?)
+	|	CURRENT_TIMESTAMP ('(' integer ')')? -> ^(FUNCTION_CALL CURRENT_TIMESTAMP integer?)
 	;
 
 stringExpr
@@ -336,7 +336,9 @@ qname	:	a=ident ('.' b=ident ('.' c=ident)?)? -> ^(QNAME $a $b? $c?)
 
 ident	:	IDENT ;
 
-number	:	NUMBER | INTEGER ;
+number	:	V_NUMBER | V_INTEGER ;
+
+integer	:	V_INTEGER ;
 
 SELECT	:	('S'|'s')('E'|'e')('L'|'l')('E'|'e')('C'|'c')('T'|'t') ;
 FROM 	: 	('F'|'f')('R'|'r')('O'|'o')('M'|'m') ;
@@ -405,8 +407,8 @@ GTE	:	'>=' ;
 
 STRING	:	'\'' ( ~'\'' | '\'' '\'' )* '\'' ;
 
-INTEGER	:	('0'..'9')+ ;
-NUMBER	:	('0'..'9')+ ('.' ('0'..'9')+)? ;
+V_INTEGER:	('0'..'9')+ ;
+V_NUMBER:	('0'..'9')+ ('.' ('0'..'9')+)? ;
 
 IDENT	:	('_'|'A'..'Z'|'a'..'z') ('_'|'A'..'Z'|'a'..'z'|'0'..'9')* ;
 
