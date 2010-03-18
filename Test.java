@@ -6,7 +6,14 @@ public class Test {
         QueryLexer lexer = new QueryLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         QueryParser parser = new QueryParser(tokens);
-        QueryParser.prog_return root = parser.prog();
+        QueryParser.prog_return root;
+        try {
+            root = parser.prog();
+        }
+        catch (Exception e) {
+            System.exit(100);
+            return;
+        }
         System.out.println(root.tree.toStringTree());
     }
 }

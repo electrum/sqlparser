@@ -35,16 +35,24 @@ tokens {
 	NOT_NULL;
 }
 
-@members {
-protected void mismatch(IntStream input, int ttype, BitSet follow)
-throws RecognitionException
-{ throw new MismatchedTokenException(ttype, input); }
-public void recoverFromMismatchedSet(
-IntStream input, RecognitionException e, BitSet follow)
-throws RecognitionException { throw e; }
+@parser::members {
+  @Override
+  protected Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException
+  { throw new MismatchedTokenException(ttype, input); }
+
+  @Override
+  public Object recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow) throws RecognitionException
+  { throw e;  }
 }
+
+@lexer::members {
+  @Override
+  public void reportError(RecognitionException re)
+  { super.reportError(re); throw new RuntimeException(re); }
+}
+
 @rulecatch {
-catch (RecognitionException re) { reportError(re); throw re; }
+  catch (RecognitionException re) { reportError(re); throw re; }
 }
 
 prog	:	query* EOF -> query*
@@ -483,8 +491,8 @@ V_NUMBER:	('0'..'9')+ ('.' ('0'..'9')+)? ;
 
 IDENT	:	('_'|'A'..'Z'|'a'..'z') ('_'|'A'..'Z'|'a'..'z'|'0'..'9')* ;
 
-SL_COMMENT:	'--' (~('\r' | '\n'))* ('\r'? '\n')? {channel=HIDDEN;} ;
+SL_COMMENT:	'--' (~('\r' | '\n'))* ('\r'? '\n')? {$channel=HIDDEN;} ;
 
-ML_COMMENT:	'/*' (options {greedy=false;} : .)* '*/' {channel=HIDDEN;} ;
+ML_COMMENT:	'/*' (options {greedy=false;} : .)* '*/' {$channel=HIDDEN;} ;
 
-WS	:	(' '|'\t'|'\n'|'\r')+ {channel=HIDDEN;} ;
+WS	:	(' '|'\t'|'\n'|'\r')+ {$channel=HIDDEN;} ;
