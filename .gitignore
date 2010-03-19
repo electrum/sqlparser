@@ -1,5 +1,5 @@
-*.class
-Query__.g
-Query.tokens
-QueryLexer.java
-QueryParser.java
+*.iml
+*.ipr
+*.iws
+.DS_Store
+target

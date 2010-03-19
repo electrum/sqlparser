@@ -1,10 +1,12 @@
 #!/bin/bash
 
-test -f Test.class || exit 100
+JAR=target/sqlparser-*-jar-with-dependencies.jar
+
+test -f $JAR || exit 100
 
 dotest()
 {
-   CLASSPATH=$CLASSPATH:antlr:. java Test
+   java -cp $JAR cafedb.sqlparser.Test
    if [ $? -eq 0 ] ; then echo "passed"; else echo "failed"; fi
 }
 

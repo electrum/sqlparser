@@ -35,6 +35,14 @@ tokens {
 	NOT_NULL;
 }
 
+@parser::header {
+  package cafedb.sqlparser;
+}
+
+@lexer::header {
+  package cafedb.sqlparser;
+}
+
 @parser::members {
   @Override
   protected Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException

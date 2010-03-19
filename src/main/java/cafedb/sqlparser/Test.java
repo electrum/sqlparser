@@ -1,7 +1,12 @@
-import org.antlr.runtime.*;
+package cafedb.sqlparser;
 
-public class Test {
-    public static void main(String[] args) throws Exception {
+import org.antlr.runtime.ANTLRInputStream;
+import org.antlr.runtime.CommonTokenStream;
+
+public class Test
+{
+    public static void main(String[] args) throws Exception
+    {
         ANTLRInputStream input = new ANTLRInputStream(System.in);
         QueryLexer lexer = new QueryLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
