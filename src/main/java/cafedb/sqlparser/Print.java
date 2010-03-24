@@ -2,6 +2,7 @@ package cafedb.sqlparser;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.tree.CommonTree;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,23 +10,31 @@ import java.io.Reader;
 
 public class Print
 {
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws Exception
     {
-        String s = readTpchQuery(getTpchQuery(6));
+        printQuery(getParser("select * from foo").query().tree);
 
+        printQuery(getParser(readFile(getTpchDdl())).queryList().tree);
+
+        printQuery(getParser(readTpchQuery(getTpchQuery(6))).queryList().tree);
+    }
+
+    private static void printQuery(CommonTree tree)
+    {
+        System.out.println(TreePrinter.stringTree(tree));
+    }
+
+    private static QueryParser getParser(String s)
+    {
         ANTLRStringStream input = new ANTLRStringStream(s);
         QueryLexer lexer = new QueryLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        QueryParser parser = new QueryParser(tokens);
-        QueryParser.prog_return root;
-        try {
-            root = parser.prog();
-        }
-        catch (Exception e) {
-            System.exit(100);
-            return;
-        }
-        System.out.println(TreePrinter.stringTree(root.tree));
+        return new QueryParser(tokens);
+    }
+
+    private static InputStreamReader getTpchDdl()
+    {
+        return new InputStreamReader(Print.class.getClassLoader().getResourceAsStream("tpch/dss.ddl"));
     }
 
     private static InputStreamReader getTpchQuery(int q)

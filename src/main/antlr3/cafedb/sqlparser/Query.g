@@ -8,7 +8,7 @@ options {
 }
 
 tokens {
-	QUERY;
+	QUERY_LIST;
 	GROUPBY;
 	ORDERBY;
 	SORT_SPEC;
@@ -63,13 +63,11 @@ tokens {
   catch (RecognitionException re) { reportError(re); throw re; }
 }
 
-prog	:	query* EOF -> query*
+queryList
+	:	(query ';')* EOF -> ^(QUERY_LIST query*)
 	;
 
-query	:	queryType ';' -> ^(QUERY queryType)
-	;
-
-queryType
+query
 	:	selectStmt 	-> ^(SELECT selectStmt)
 	|	createTableStmt -> ^(CREATE_TABLE createTableStmt)
 	;

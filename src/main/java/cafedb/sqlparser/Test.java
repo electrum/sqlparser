@@ -12,7 +12,7 @@ public class Test
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         QueryParser parser = new QueryParser(tokens);
         try {
-            System.out.println(parser.prog().tree.toStringTree());
+            System.out.println(parser.queryList().tree.toStringTree());
         }
         catch (Exception e) {
             System.exit(100);
