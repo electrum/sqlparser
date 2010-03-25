@@ -108,7 +108,8 @@ selectExpr
 	:	setQuant? ('*' | columnList)
 	;
 
-setQuant:	DISTINCT | ALL
+setQuant:	DISTINCT
+	|	ALL ->
 	;
 
 columnList
