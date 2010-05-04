@@ -14,9 +14,9 @@ public class Print
     {
         printQuery(getParser("select * from foo").query().tree);
 
-        printQuery(getParser(readFile(getTpchDdl())).queryList().tree);
+        printQuery(getParser(getTpchDdl()).queryList().tree);
 
-        printQuery(getParser(readTpchQuery(getTpchQuery(6))).queryList().tree);
+        printQuery(getParser(getTpchQuery(6)).queryList().tree);
     }
 
     private static void printQuery(CommonTree tree)
@@ -32,20 +32,23 @@ public class Print
         return new QueryParser(tokens);
     }
 
-    private static InputStreamReader getTpchDdl()
+    private static String getTpchDdl() throws IOException
     {
-        return new InputStreamReader(Print.class.getClassLoader().getResourceAsStream("tpch/dss.ddl"));
+        return readResource("tpch/dss.ddl");
     }
 
-    private static InputStreamReader getTpchQuery(int q)
+    private static String getTpchQuery(int q) throws IOException
     {
-        String s = "tpch/queries/" + q + ".sql";
-        return new InputStreamReader(Print.class.getClassLoader().getResourceAsStream(s));
+        return fixTpchQuery(readResource("tpch/queries/" + q + ".sql"));
     }
 
-    private static String readTpchQuery(Reader r) throws IOException
+    private static String readResource(String name) throws IOException
     {
-        String s = readFile(r);
+        return readFile(new InputStreamReader(Print.class.getClassLoader().getResourceAsStream(name)));
+    }
+
+    private static String fixTpchQuery(String s)
+    {
         s = s.replaceAll("(?m)^:[xo]$", "");
         s = s.replaceAll("(?m)^:n -?[0-9]+", "");
         s = s.replaceAll("([^']):([0-9]+)", "$1$2");
