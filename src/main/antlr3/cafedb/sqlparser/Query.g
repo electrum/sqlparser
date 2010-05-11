@@ -78,6 +78,7 @@ selectStmt
 		whereClause?
 		(groupClause havingClause?)?
 		orderClause?
+		limitClause?
 	;
 
 selectClause
@@ -102,6 +103,10 @@ havingClause
 
 orderClause
 	:	ORDER BY orderBy -> ^(ORDERBY orderBy)
+	;
+
+limitClause
+	:	LIMIT integer -> ^(LIMIT integer)
 	;
 
 selectExpr
@@ -423,6 +428,7 @@ GROUP 	: 	('G'|'g')('R'|'r')('O'|'o')('U'|'u')('P'|'p') ;
 BY 	: 	('B'|'b')('Y'|'y') ;
 ORDER 	: 	('O'|'o')('R'|'r')('D'|'d')('E'|'e')('R'|'r') ;
 HAVING 	: 	('H'|'h')('A'|'a')('V'|'v')('I'|'i')('N'|'n')('G'|'g') ;
+LIMIT 	: 	('L'|'l')('I'|'i')('M'|'m')('I'|'i')('T'|'t') ;
 OR 	: 	('O'|'o')('R'|'r') ;
 AND 	: 	('A'|'a')('N'|'n')('D'|'d') ;
 IN	:	('I'|'i')('N'|'n') ;

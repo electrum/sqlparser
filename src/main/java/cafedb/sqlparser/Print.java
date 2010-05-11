@@ -17,6 +17,7 @@ public class Print
         printQuery(getParser(getTpchDdl()).queryList().tree);
 
         printQuery(getParser(getTpchQuery(6)).queryList().tree);
+        printQuery(getParser(getTpchQuery(2)).queryList().tree);
     }
 
     private static void printQuery(CommonTree tree)
@@ -49,9 +50,12 @@ public class Print
 
     private static String fixTpchQuery(String s)
     {
+        s = s.replaceFirst("(?m);$", "");
         s = s.replaceAll("(?m)^:[xo]$", "");
-        s = s.replaceAll("(?m)^:n -?[0-9]+", "");
+        s = s.replaceAll("(?m)^:n -1$", "");
+        s = s.replaceAll("(?m)^:n ([0-9]+)$", "LIMIT $1");
         s = s.replaceAll("([^']):([0-9]+)", "$1$2");
+        s += ";";
         return s;
     }
 

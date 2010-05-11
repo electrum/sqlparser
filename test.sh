@@ -20,7 +20,10 @@ do
    echo "*** testing query $n ***"
    < ~/tpch/queries/$n.sql tr -d '\r' | \
    sed 's/^:[xo]$//' | \
-   perl -pe 's/^:n -?[0-9]+//' | \
+   sed 's/;$//' | \
+   perl -pe 's/^:n -1$//' | \
+   perl -pe 's/^:n ([0-9]+)$/LIMIT \1/' | \
    perl -pe "s/([^']):([0-9]+)/\\1\\2/g" | \
+   (cat; echo ";") | \
    dotest
 done
