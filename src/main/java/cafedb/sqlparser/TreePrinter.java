@@ -24,7 +24,7 @@ public class TreePrinter
         sb.append("(");
         sb.append(tree.toString());
         for (CommonTree t : (List<CommonTree>) tree.getChildren()) {
-            if (!isLeaf(tree)) {
+            if (leafCount(tree) > 2) {
                 sb.append("\n");
                 sb.append(repeatString("   ", depth));
             }
@@ -38,14 +38,17 @@ public class TreePrinter
     }
 
     @SuppressWarnings({"unchecked"})
-    private static boolean isLeaf(CommonTree tree)
+    private static int leafCount(CommonTree tree)
     {
-        for (CommonTree t : (List<CommonTree>) tree.getChildren()) {
-            if (t.getChildCount() > 0) {
-                return false;
-            }
+        if (tree.getChildCount() == 0) {
+            return 1;
         }
-        return true;
+
+        int n = 0;
+        for (CommonTree t : (List<CommonTree>) tree.getChildren()) {
+            n += leafCount(t);
+        }
+        return n;
     }
 
     private static String repeatString(String s, int n)
