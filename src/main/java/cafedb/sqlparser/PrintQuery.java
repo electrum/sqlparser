@@ -1,9 +1,6 @@
 package cafedb.sqlparser;
 
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -24,7 +21,7 @@ public class PrintQuery
             }
 
             try {
-                String s = TreePrinter.stringTree(getParser(line).query().tree);
+                String s = TreePrinter.stringTree(ParseDriver.parseQueryList(line));
                 System.out.println(s);
             }
             catch (RecognitionException e) {
@@ -33,13 +30,5 @@ public class PrintQuery
             }
             System.out.println();
         }
-    }
-
-    private static QueryParser getParser(String s)
-    {
-        ANTLRStringStream input = new ANTLRStringStream(s);
-        QueryLexer lexer = new QueryLexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        return new QueryParser(tokens);
     }
 }
