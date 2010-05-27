@@ -14,7 +14,7 @@ public class ParseDriver
 {
     public static CommonTree parseQuery(String s) throws RecognitionException
     {
-        return (CommonTree) getParser(s).query().getTree();
+        return (CommonTree) getParser(s).singleQuery().getTree();
     }
 
     public static CommonTree parseQueryList(String s) throws RecognitionException

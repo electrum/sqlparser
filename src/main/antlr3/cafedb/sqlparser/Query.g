@@ -63,6 +63,10 @@ tokens {
   catch (RecognitionException re) { reportError(re); throw re; }
 }
 
+singleQuery
+        :       query EOF!
+        ;
+
 queryList
 	:	(query ';')* EOF -> ^(QUERY_LIST query*)
 	;
